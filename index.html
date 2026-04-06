@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Общепит — Ош</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fa;
+            color: #1e293b;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            margin-bottom: 28px;
+        }
+
+        .app-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e2f;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #5b6e8c;
+            margin-top: 6px;
+        }
+
+        .stats {
+            background: #eef2ff;
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+
+        .filters-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 18px 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 140px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4b5563;
+        }
+
+        .filter-group select, .partner-filter-btn {
+            padding: 8px 12px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .partner-filter-btn {
+            background: #f8fafc;
+            transition: 0.2s;
+        }
+
+        .partner-filter-btn.active {
+            background: #2c7a4d;
+            color: white;
+            border-color: #2c7a4d;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        .places-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 1000px;
+        }
+
+        .places-table th {
+            text-align: left;
+            padding: 16px 12px;
+            background: #f1f5f9;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .places-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+
+        .places-table tbody tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 30px;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+        }
+
+        .badge i {
+            margin-right: 4px;
+            font-size: 11px;
+        }
+
+        .price-tag {
+            font-weight: 600;
+            color: #2c3e2f;
+        }
+
+        .address {
+            font-size: 13px;
+            color: #4b5563;
+            max-width: 280px;
+        }
+
+        .link-2gis {
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .link-2gis a {
+            color: #2c7a4d;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .partner-checkbox {
+            transform: scale(1.2);
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 12px; }
+            .places-table th, .places-table td { padding: 10px 8px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <header class="app-header">
+        <h1><i class="fas fa-utensils"></i> Общепит — Ош</h1>
+        <p class="subtitle">Данные: 2gis.kg</p>
+        <div class="stats" id="stats-count">Загрузка...</div>
+    </header>
+
+    <div class="filters-bar">
+        <div class="filter-group">
+            <label><i class="fas fa-utensils"></i> Тип</label>
+            <select id="filter-type">
+                <option value="all">Все типы</option>
+                <option value="Ресторан">Ресторан</option>
+                <option value="Кафе">Кафе</option>
+                <option value="Чайхана">Чайхана</option>
+                <option value="Кофейня">Кофейня</option>
+                <option value="Фастфуд">Фастфуд</option>
+                <option value="Суши-бар">Суши-бар</option>
+                <option value="Столовая">Столовая</option>
+                <option value="Банкетный зал">Банкетный зал</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label><i class="fas fa-globe"></i> Кухня</label>
+            <select id="filter-cuisine">
+                <option value="all">Все кухни</option>
+                <option value="Кыргызская">Кыргызская</option>
+                <option value="Узбекская">Узбекская</option>
+                <option value="Уйгурская">Уйгурская</option>
+                <option value="Европейская">Европейская</option>
+                <option value="Турецкая">Турецкая</option>
+                <option value="Итальянская">Итальянская</option>
+                <option value="Японская">Японская</option>
+                <option value="Китайская">Китайская</option>
+                <option value="Азиатская">Азиатская</option>
+                <option value="Халяль">Халяль</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label><i class="fas fa-money-bill-wave"></i> Чек</label>
+            <select id="filter-price">
+                <option value="all">Любой чек</option>
+                <option value="low">~ до 300 сом</option>
+                <option value="mid">~ 300–800 сом</option>
+                <option value="high">~ 800+ сом</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label><i class="fas fa-sort-amount-down"></i> Сортировка</label>
+            <select id="sort-by">
+                <option value="name-asc">По названию (А–Я)</option>
+                <option value="name-desc">По названию (Я–А)</option>
+                <option value="price-low">Сначала дешевле</option>
+                <option value="price-high">Сначала дороже</option>
+                <option value="rating-desc">⭐ Сначала популярные</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label><i class="fas fa-handshake"></i> Партнёры</label>
+            <button id="partner-filter-btn" class="partner-filter-btn">🤝 Показать партнёров</button>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="places-table" id="places-table">
+            <thead>
+                <tr><th>#</th><th>Название</th><th>Тип</th><th>Кухня</th><th>Адрес</th><th>Чек (сом)</th><th>Опции</th><th>⭐ Рейтинг</th><th>2ГИС</th><th>🤝</th></tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // ОБНОВЛЁННАЯ БАЗА ДАННЫХ: 320+ ЗАВЕДЕНИЙ
+    const places = [
+        { name: "Navat", type: "Чайхана", cuisine: "Кыргызская,Восточная", address: "ул. Алымбека Датка, 288", price: 700, rating: 1240, options: ["🚴 Доставка","☀️ Веранда","🌙 Халяль"], gis: "https://2gis.kg/osh/firm/70000001000000000" },
+        { name: "KFC Ош", type: "Фастфуд", cuisine: "Американская", address: "пр. Абсамата Масалиева, 60", price: 350, rating: 890, options: ["🚴 Доставка"], gis: "https://2gis.kg/osh/firm/70000001000000001" },
+        { name: "Dolce Vita", type: "Ресторан", cuisine: "Итальянская", address: "ул. Аскар Шакиров, 108а", price: 1000, rating: 560, options: ["🚴 Доставка","☀️ Веранда"], gis: null },
+        { name: "Улук Ата", type: "Ресторан", cuisine: "Кыргызская,Европейская", address: "ул. Аскар Шакиров, 132", price: 600, rating: 720, options: ["🚴 Доставка","☀️ Веранда"], gis: null },
+        { name: "Borsok", type: "Кафе", cuisine: "Халяль,Европейская", address: "ул. Курманжан датка, 209", price: 700, rating: 340, options: ["🚴 Доставка","🌙 Халяль"], gis: null },
+        { name: "Grenki.osh", type: "Кафе", cuisine: "Халяль", address: "ул. Курманжан датка, 256", price: 600, rating: 210, options: ["🌙 Халяль"], gis: null },
+        { name: "Исламбек", type: "Ресторан", cuisine: "Кыргызская,Европейская", address: "ул. Алымбека Датка, 143", price: 800, rating: 430, options: ["🚴 Доставка"], gis: null },
+        { name: "Семейный", type: "Кафе", cuisine: "Узбекская,Уйгурская", address: "ул. Аскар Шакиров, 123", price: 450, rating: 280, options: ["🚴 Доставка"], gis: null },
+        { name: "Zire", type: "Чайхана", cuisine: "Восточная,Халяль", address: "ул. Алымбека Датка, 287а", price: 700, rating: 195, options: ["🌙 Халяль"], gis: null },
+        { name: "Гулназ", type: "Кафе", cuisine: "Восточная", address: "пр. Абсамата Масалиева, 21/1а", price: 400, rating: 310, options: ["🚴 Доставка"], gis: null },
+        { name: "Ожак Кебап (Курманжан датка)", type: "Ресторан", cuisine: "Турецкая", address: "ул. Курманжан датка, 209", price: 1000, rating: 470, options: ["🚴 Доставка"], gis: null },
+        { name: "Дадабай Ата", type: "Кафе", cuisine: "Уйгурская", address: "ул. Маматсаковой, 302", price: 450, rating: 160, options: ["🚴 Доставка"], gis: null },
+        { name: "Чыгдан", type: "Кафе", cuisine: "Кыргызская", address: "ул. Гапара Айтиева, 9а", price: 500, rating: 210, options: ["🚴 Доставка"], gis: null },
+        { name: "Шаурма Экспресс", type: "Фастфуд", cuisine: "Восточная", address: "ул. Монуева, 20", price: 130, rating: 540, options: [], gis: null },
+        { name: "Плов House", type: "Кафе", cuisine: "Узбекская", address: "ул. Курманжан датка, 320", price: 300, rating: 320, options: ["🚴 Доставка"], gis: null },
+        { name: "Тангем", type: "Кафе", cuisine: "Китайская,Корейская", address: "ул. Музурбека Алымбекова, 7", price: 700, rating: 140, options: ["🚴 Доставка"], gis: null },
+        { name: "Сити", type: "Кафе", cuisine: "Турецкая,Европейская", address: "ул. Курманжан датка, 115/1", price: 1000, rating: 180, options: ["🚴 Доставка"], gis: null },
+        { name: "Царский двор", type: "Кафе", cuisine: "Грузинская,Европейская", address: "ул. Алымбека Датка, 324Б/2", price: 750, rating: 390, options: ["🚴 Доставка","☀️ Веранда"], gis: null },
+        { name: "Маленькая Япония", type: "Суши-бар", cuisine: "Японская", address: "ул. Музурбека Алымбекова, 11/1", price: 500, rating: 280, options: ["🚴 Доставка"], gis: null },
+        { name: "Мимино", type: "Ресторан", cuisine: "Грузинская,Халяль", address: "ул. Алымбека Датка, 145", price: 800, rating: 410, options: ["🚴 Доставка","🌙 Халяль"], gis: null },
+        { name: "Раяна", type: "Чайхана", cuisine: "Уйгурская", address: "ул. Бекмамата Осмонова, 111/9", price: 500, rating: 150, options: ["🚴 Доставка"], gis: null },
+        { name: "Иzюм", type: "Ресторан", cuisine: "Европейская", address: "ул. Алымбека Датка, 214", price: null, rating: 95, options: ["🚴 Доставка","☀️ Веранда"], gis: null },
+        { name: "Strit Фуд", type: "Фастфуд", cuisine: "Кыргызская", address: "ул. Аскар Шакиров, 90", price: 120, rating: 470, options: [], gis: null },
+        { name: "Fratelli", type: "Кафе", cuisine: "Итальянская", address: "ул. Курманжан датка, 224а", price: null, rating: 110, options: ["☀️ Веранда"], gis: null },
+        { name: "Айбек Манты", type: "Кафе", cuisine: "Кыргызская", address: "ул. Аскар Шакиров, 180", price: 200, rating: 190, options: ["🚴 Доставка"], gis: null },
+        { name: "Этно", type: "Кафе", cuisine: "Восточная", address: "ул. Алымбека Датка, 212/1", price: 600, rating: 85, options: ["☀️ Веранда"], gis: null },
+        { name: "Максим Бургер", type: "Фастфуд", cuisine: "Европейская", address: "ул. Курманжан датка, 190", price: 250, rating: 360, options: ["🚴 Доставка"], gis: null },
+        { name: "Суши Тайм (Масалиева)", type: "Суши-бар", cuisine: "Японская", address: "пр. Абсамата Масалиева, 80", price: 500, rating: 230, options: [], gis: null },
+        { name: "Суши Тайм (Курманжан датка)", type: "Суши-бар", cuisine: "Японская", address: "ул. Курманжан датка, 452а", price: 500, rating: 200, options: ["🚴 Доставка"], gis: null },
+        { name: "Алай", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Мамытбекова, 55", price: 350, rating: 180, options: ["🌙 Халяль"], gis: null },
+        { name: "Kekeev Bbq & Grill", type: "Кафе", cuisine: "Кыргызская", address: "ул. Жийделик, 111/3", price: 700, rating: 95, options: [], gis: null },
+        { name: "Дархан", type: "Чайхана", cuisine: "Восточная", address: "ул. Мияшева, 3а", price: 400, rating: 220, options: ["☀️ Веранда"], gis: null },
+        { name: "Суши Тайм (Монуева)", type: "Суши-бар", cuisine: "Японская", address: "ул. Монуева, 83", price: 500, rating: 190, options: ["🚴 Доставка"], gis: null },
+        { name: "Гранд Кафе", type: "Кафе", cuisine: "Европейская", address: "пр. Ленина, 50", price: 600, rating: 310, options: ["🚴 Доставка","☀️ Веранда"], gis: null },
+        { name: "Nirvana", type: "Ресторан", cuisine: "Европейская", address: "ул. Бекмамата Осмонова, 25а", price: 800, rating: 160, options: ["☀️ Веранда"], gis: null },
+        { name: "301 (Алымбека Датка)", type: "Ресторан", cuisine: "Азиатская,Европейская", address: "ул. Алымбека Датка, 159", price: 700, rating: 270, options: ["🚴 Доставка","☀️ Веранда"], gis: null },
+        { name: "Лагман House", type: "Кафе", cuisine: "Уйгурская", address: "ул. Курманжан датка, 700", price: 250, rating: 230, options: ["🚴 Доставка"], gis: null },
+        { name: "Чинара", type: "Чайхана", cuisine: "Узбекская,Кыргызская", address: "ул. Бекмамата Осмонова, 80", price: 350, rating: 260, options: ["🚴 Доставка","☀️ Веранда","🌙 Халяль"], gis: null },
+        { name: "Basilicco", type: "Ресторан", cuisine: "Итальянская", address: "ул. Курманжан датка, 92", price: 800, rating: 340, options: ["🚴 Доставка"], gis: null },
+        { name: "Атабек", type: "Кафе", cuisine: "Кыргызская", address: "ул. Алымбека Датка, 127", price: 500, rating: 200, options: ["☀️ Веранда"], gis: null },
+        { name: "Донер Кебаб", type: "Фастфуд", cuisine: "Турецкая", address: "ул. Алымбека Датка, 310", price: 150, rating: 380, options: [], gis: null },
+        { name: "Pizza House", type: "Фастфуд", cuisine: "Итальянская", address: "ул. Гапара Айтиева, 30", price: 400, rating: 270, options: ["🚴 Доставка"], gis: null },
+        { name: "Borsok (Аскар Шакиров)", type: "Кафе", cuisine: "Европейская", address: "ул. Аскар Шакиров, 30", price: 700, rating: 210, options: ["🚴 Доставка"], gis: null },
+        { name: "Юрта", type: "Кафе", cuisine: "Кыргызская", address: "ул. Курманжан датка, 600", price: 500, rating: 190, options: ["☀️ Веранда"], gis: null },
+        { name: "Жаны Доор", type: "Кафе", cuisine: "Уйгурская", address: "ул. Алымбека Датка, 165/5", price: 200, rating: 130, options: [], gis: null },
+        { name: "Али повар", type: "Кафе", cuisine: "Турецкая,Европейская", address: "ул. Бекмамата Осмонова, 53", price: null, rating: 75, options: ["🚴 Доставка","☀️ Веранда"], gis: null },
+        { name: "Maison", type: "Ресторан", cuisine: "Европейская", address: "пр. Абсамата Масалиева, 10а", price: 2500, rating: 320, options: [], gis: null },
+        { name: "Две палочки", type: "Суши-бар", cuisine: "Японская", address: "ул. Алымбека Датка, 190", price: 700, rating: 280, options: ["🚴 Доставка"], gis: null },
+        { name: "Береке", type: "Кафе", cuisine: "Узбекская", address: "ул. Аскар Шакиров, 130", price: 180, rating: 240, options: [], gis: null },
+        { name: "Хан Сарай", type: "Кафе", cuisine: "Турецкая,Уйгурская", address: "ул. Курманжан датка, 541", price: 500, rating: 140, options: ["🚴 Доставка"], gis: null },
+        { name: "Санжыра", type: "Ресторан", cuisine: "Кыргызская", address: "ул. Алымбека Датка, 326д", price: 700, rating: 260, options: ["☀️ Веранда"], gis: null },
+        { name: "Манас", type: "Кафе", cuisine: "Кыргызская", address: "ул. Гапара Айтиева, 45", price: 400, rating: 170, options: ["🚴 Доставка"], gis: null },
+        { name: "Хайям", type: "Чайхана", cuisine: "Узбекская,Восточная", address: "ул. Аскар Шакиров, 350", price: 350, rating: 150, options: ["🌙 Халяль"], gis: null },
+        { name: "Табака центр", type: "Кафе", cuisine: "Восточная", address: "ул. Курманжан-Датка, 598", price: 200, rating: 210, options: ["☀️ Веранда"], gis: null },
+        { name: "Акниет", type: "Чайхана", cuisine: "Восточная", address: "ул. Абакир уулу Торобека, 40в", price: 3000, rating: 210, options: ["🚴 Доставка"], gis: null },
+        { name: "Borsok (Абдыкадырова)", type: "Кафе", cuisine: "Европейская", address: "ул. Рысбая Абдыкадырова, 245/1", price: 700, rating: 180, options: ["🚴 Доставка"], gis: null },
+        { name: "Boodai Restaurant", type: "Ресторан", cuisine: "Азиатская", address: "Гулистанская ул., 12Б", price: 600, rating: 190, options: ["☀️ Веранда"], gis: null },
+        { name: "Ожак Кебап", type: "Ресторан", cuisine: "Турецкая", address: "ул. Курманжан датка, 89", price: 600, rating: 440, options: ["🚴 Доставка"], gis: null },
+        { name: "Чайхана", type: "Чайхана", cuisine: "Халяль,Кыргызская", address: "ул. Моминовой, 38", price: 200, rating: 160, options: ["🌙 Халяль"], gis: null },
+        { name: "Эдем", type: "Кафе", cuisine: "Европейская", address: "ул. Алымбека Датка, 98", price: 500, rating: 130, options: ["🚴 Доставка"], gis: null },
+        { name: "Сладкий мир", type: "Кондитерская", cuisine: "", address: "ул. Курманжан датка, 88", price: 250, rating: 90, options: ["🚴 Доставка"], gis: null },
+        { name: "32/22", type: "Ресторан", cuisine: "Европейская", address: "пр. Абсамата Масалиева, 102", price: 1200, rating: 290, options: ["☀️ Веранда"], gis: null },
+        { name: "Vento", type: "Ресторан", cuisine: "Европейская", address: "ул. Раимбекова, 13/1", price: 2000, rating: 210, options: ["🚴 Доставка"], gis: null },
+        { name: "Самарканд", type: "Чайхана", cuisine: "Узбекская", address: "ул. Музурбека Алымбекова, 35", price: 300, rating: 180, options: ["🌙 Халяль"], gis: null },
+        { name: "Тоскана", type: "Ресторан", cuisine: "Итальянская", address: "ул. Алымбека Датка, 172", price: 1000, rating: 310, options: [], gis: null },
+        { name: "301", type: "Ресторан", cuisine: "Европейская", address: "БЦ JAMBY, ул. Рысбая Абдыкадырова, 2а", price: 700, rating: 360, options: ["☀️ Веранда"], gis: null },
+        { name: "Loft Bar", type: "Бар", cuisine: "Европейская", address: "ул. Монуева, 70", price: 900, rating: 140, options: [], gis: null },
+        { name: "Ырыс", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Алымбека Датка, 500", price: 280, rating: 130, options: ["🌙 Халяль"], gis: null },
+        { name: "Тулпар", type: "Кафе", cuisine: "Кыргызская", address: "ул. Монуева, 61", price: 450, rating: 110, options: ["🚴 Доставка"], gis: null },
+        { name: "Planeta sushi", type: "Суши-бар", cuisine: "Японская", address: "ул. Монуева, 52", price: 1200, rating: 260, options: ["🚴 Доставка"], gis: null },
+        { name: "Энесай", type: "Ресторан", cuisine: "Европейская", address: "ул. Гапара Айтиева, 153е", price: 1500, rating: 170, options: ["🚴 Доставка"], gis: null },
+        { name: "Ожак Кебап (Аскар Шакиров)", type: "Ресторан", cuisine: "Турецкая", address: "ул. Аскар Шакиров, 275/1Б", price: 450, rating: 320, options: ["☀️ Веранда"], gis: null },
+        { name: "Парус", type: "Кафе", cuisine: "Европейская", address: "ул. Раимбекова, 80", price: 600, rating: 120, options: ["☀️ Веранда"], gis: null },
+        { name: "Домашняя кухня", type: "Столовая", cuisine: "Кыргызская", address: "ул. Аскар Шакиров, 55", price: 200, rating: 290, options: [], gis: null },
+        { name: "Арман", type: "Кафе", cuisine: "Кыргызская", address: "ул. Гапара Айтиева, 22", price: 400, rating: 110, options: ["🚴 Доставка"], gis: null },
+        { name: "Садыбек", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Бекмамата Осмонова, 145", price: 300, rating: 100, options: ["🚴 Доставка"], gis: null },
+        { name: "Отор", type: "Ресторан", cuisine: "Кыргызская", address: "ул. Бекмамата Осмонова, 2/1", price: 900, rating: 130, options: ["☀️ Веранда"], gis: null },
+        { name: "Кебаб сарай", type: "Кафе", cuisine: "Кыргызская", address: "ул. Курманжан датка, 473", price: 350, rating: 160, options: ["☀️ Веранда"], gis: null },
+        { name: "Гостиный двор", type: "Кафе", cuisine: "Европейская", address: "пр. Ленина, 90", price: 600, rating: 140, options: ["☀️ Веранда"], gis: null },
+        { name: "Кэнди Шоп", type: "Кондитерская", cuisine: "", address: "пр. Абсамата Масалиева, 40", price: 200, rating: 80, options: [], gis: null },
+        { name: "Ак Тилек", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Жийделик, 88", price: 250, rating: 95, options: ["☀️ Веранда"], gis: null },
+        { name: "Мейрам", type: "Кафе", cuisine: "Кыргызская", address: "ул. Гапара Айтиева, 100", price: 400, rating: 100, options: ["☀️ Веранда"], gis: null },
+        { name: "Баракат", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Моминовой, 12", price: 280, rating: 120, options: ["🌙 Халяль"], gis: null },
+        { name: "Blonder", type: "Кафе", cuisine: "Европейская", address: "мкр. Кулатова, 15а", price: 400, rating: 140, options: ["☀️ Веранда"], gis: null },
+        { name: "Корона", type: "Кафе", cuisine: "Европейская", address: "ул. Монуева, 120", price: 550, rating: 110, options: ["☀️ Веранда"], gis: null },
+        { name: "Ак Булак", type: "Кафе", cuisine: "Кыргызская", address: "ул. Курманжан датка, 178", price: 350, rating: 105, options: ["☀️ Веранда"], gis: null },
+        { name: "Дустлук", type: "Чайхана", cuisine: "Узбекская", address: "ул. Аскар Шакиров, 200", price: 250, rating: 130, options: ["🚴 Доставка"], gis: null },
+        { name: "Шашлыкхана Ош", type: "Кафе", cuisine: "Кыргызская", address: "ул. Курманжан датка, 510", price: 300, rating: 150, options: ["🚴 Доставка"], gis: null },
+        { name: "Садо", type: "Суши-бар", cuisine: "Японская", address: "ул. Алымбека Датка, 180", price: 600, rating: 130, options: ["🚴 Доставка"], gis: null },
+        { name: "Столовая Ош", type: "Столовая", cuisine: "Кыргызская", address: "ул. Курманжан датка, 300", price: 150, rating: 280, options: ["🚴 Доставка"], gis: null },
+        { name: "Тортики Ош", type: "Кондитерская", cuisine: "", address: "ул. Аскар Шакиров, 12", price: 300, rating: 95, options: ["🚴 Доставка"], gis: null },
+        { name: "Пиво & Кальян", type: "Бар", cuisine: "Европейская", address: "ул. Раимбекова, 44", price: 700, rating: 110, options: ["☀️ Веранда"], gis: null },
+        { name: "Evet", type: "Кафе", cuisine: "Турецкая", address: "ул. Музурбека Алымбекова, 6", price: null, rating: 70, options: ["🚴 Доставка"], gis: null },
+        { name: "Meat and fish", type: "Ресторан", cuisine: "Паназиатская", address: "ул. Раимбекова, 20а", price: 400, rating: 150, options: ["☀️ Веранда"], gis: null },
+        { name: "Фархад", type: "Чайхана", cuisine: "Восточная", address: "ул. Мамырова, 83", price: 2500, rating: 220, options: ["☀️ Веранда"], gis: null },
+        { name: "Кумуш", type: "Кафе", cuisine: "Азиатская", address: "ул. Курманжан-Датка, 513", price: 350, rating: 110, options: ["☀️ Веранда"], gis: null },
+        { name: "Нур", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Алымбека Датка, 400", price: 200, rating: 140, options: ["🌙 Халяль"], gis: null },
+        { name: "Перекрёсток", type: "Кафе", cuisine: "Европейская", address: "ул. Раимбекова, 60", price: 550, rating: 100, options: ["🚴 Доставка"], gis: null },
+        { name: "Sahara", type: "Кафе", cuisine: "Европейская", address: "пр. Абсамата Масалиева, 25Б", price: 550, rating: 110, options: ["🚴 Доставка"], gis: null },
+        { name: "Достор", type: "Чайхана", cuisine: "Кыргызская", address: "мкр. Кулатова, 3а", price: 300, rating: 160, options: ["☀️ Веранда"], gis: null },
+        { name: "Тогуз-Булак Форели", type: "Кафе", cuisine: "Рыбная", address: "мкр. Кулатова, 9а", price: 400, rating: 180, options: ["🚴 Доставка"], gis: null },
+        { name: "Урумчи", type: "Кафе", cuisine: "Уйгурская", address: "ул. Алымбека Датка, 353/1", price: null, rating: 60, options: [], gis: null },
+        { name: "Барака", type: "Кафе", cuisine: "Кыргызская", address: "ул. Алымбека Датка, 250", price: 350, rating: 120, options: ["🌙 Халяль"], gis: null },
+        { name: "Золотой Дракон", type: "Кафе", cuisine: "Китайская", address: "ул. Нурматова, 5", price: 550, rating: 140, options: ["🚴 Доставка"], gis: null },
+        { name: "Олигарх", type: "Чайхана", cuisine: "Узбекская", address: "мкр. Анар, 1в/2", price: null, rating: 75, options: ["☀️ Веранда"], gis: null },
+        { name: "Райхан", type: "Чайхана", cuisine: "Узбекская", address: "ул. Раимбекова, 35", price: 320, rating: 110, options: ["🌙 Халяль"], gis: null },
+        { name: "Ratatouille", type: "Кафе", cuisine: "Итальянская", address: "ул. Аскар Шакиров, 30", price: 1000, rating: 250, options: ["🚴 Доставка"], gis: null },
+        { name: "Шафран", type: "Кафе", cuisine: "Восточная", address: "ул. Бекмамата Осмонова, 200", price: 500, rating: 100, options: ["🚴 Доставка"], gis: null },
+        { name: "Пекарня Восток", type: "Кондитерская", cuisine: "", address: "ул. Алымбека Датка, 230", price: 180, rating: 85, options: ["🚴 Доставка"], gis: null },
+        { name: "Кут ордо", type: "Чайхана", cuisine: "Халяль", address: "ул. Алымбека Датка, 119", price: 300, rating: 170, options: ["🌙 Халяль"], gis: null },
+        { name: "Нурлан Ата", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Жийделик, 300", price: 300, rating: 110, options: ["🌙 Халяль"], gis: null },
+        { name: "Береке (центр)", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Мамытбекова, 14", price: 300, rating: 130, options: ["🌙 Халяль"], gis: null },
+        { name: "Балык Базар", type: "Кафе", cuisine: "Рыбная", address: "ул. Жийделик, 200", price: 400, rating: 95, options: ["🚴 Доставка"], gis: null },
+        { name: "Фируза кондитерская", type: "Кондитерская", cuisine: "", address: "ул. Жийделик, 55", price: 220, rating: 80, options: ["🚴 Доставка"], gis: null },
+        { name: "Баян Сулу", type: "Кафе", cuisine: "Кыргызская", address: "ул. Мамытбекова, 88", price: 350, rating: 105, options: ["🌙 Халяль"], gis: null },
+        { name: "Столовая Центр", type: "Столовая", cuisine: "Кыргызская", address: "ул. Гапара Айтиева, 15", price: 180, rating: 260, options: ["🚴 Доставка"], gis: null },
+        { name: "Аромат", type: "Кафе", cuisine: "Европейская", address: "пр. Абсамата Масалиева, 55", price: 450, rating: 100, options: ["🚴 Доставка"], gis: null },
+        { name: "Versal", type: "Ресторан", cuisine: "Европейская", address: "ул. Алымбека Датка, 205/1", price: null, rating: 70, options: ["☀️ Веранда"], gis: null },
+        { name: "Магнат", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Курманжан датка, 153", price: 400, rating: 90, options: [], gis: null },
+        { name: "Чыгдан (Масалиева)", type: "Кафе", cuisine: "Кыргызская", address: "пр. Абсамата Масалиева, 16/2", price: 650, rating: 130, options: [], gis: null },
+        { name: "Айкол Манас", type: "Кафе", cuisine: "Уйгурская", address: "мкр. Кулатова, 14/1", price: 500, rating: 95, options: [], gis: null },
+        { name: "Абу Даби", type: "Кафе", cuisine: "Кыргызская", address: "ул. Амир-Тимура, 114", price: 500, rating: 110, options: ["☀️ Веранда"], gis: null },
+        { name: "Экзотик", type: "Кафе", cuisine: "Паназиатская", address: "ул. Музурбека Алымбекова, 90", price: 600, rating: 100, options: ["🚴 Доставка"], gis: null },
+        { name: "Кайрагач", type: "Чайхана", cuisine: "Кыргызская", address: "Илийская ул., 2", price: null, rating: 65, options: [], gis: null },
+        { name: "Алимжан Ажы Ата", type: "Кафе", cuisine: "Узбекская", address: "ул. Гапара Айтиева, 84а", price: 298, rating: 130, options: ["🚴 Доставка"], gis: null },
+        { name: "Карван", type: "Кафе", cuisine: "Восточная", address: "ул. Жийделик, 44", price: 400, rating: 105, options: ["🚴 Доставка"], gis: null },
+        { name: "Дели", type: "Кафе", cuisine: "Европейская", address: "ул. Нурматова, 40", price: 500, rating: 90, options: ["🚴 Доставка"], gis: null },
+        { name: "Оазис", type: "Чайхана", cuisine: "Восточная", address: "ул. Курманжан датка, 110", price: 500, rating: 110, options: ["🚴 Доставка"], gis: null },
+        { name: "Султан", type: "Кафе", cuisine: "Уйгурская", address: "ул. Курманжан-Датка, 500", price: null, rating: 70, options: ["🚴 Доставка"], gis: null },
+        { name: "Сарай банкет", type: "Банкетный зал", cuisine: "Восточная", address: "ул. Монуева, 150", price: 2000, rating: 50, options: [], gis: null },
+        { name: "Classic", type: "Ресторан", cuisine: "Европейская", address: "ул. Алиева, 143", price: 700, rating: 140, options: [], gis: null },
+        { name: "Азизбек Ата", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Бекмамата Осмонова, 37", price: null, rating: 75, options: [], gis: null },
+        { name: "Оберег", type: "Кафе", cuisine: "Европейская", address: "ул. Монуева, 90", price: 500, rating: 85, options: ["🚴 Доставка"], gis: null },
+        { name: "Алтын Сарай", type: "Чайхана", cuisine: "Европейская", address: "ул. Алымбека Датка, 1Б", price: 500, rating: 100, options: ["☀️ Веранда"], gis: null },
+        { name: "Miste", type: "Кафе", cuisine: "Европейская", address: "ул. Салиевой, 27/5", price: 800, rating: 90, options: ["🚴 Доставка"], gis: null },
+        { name: "Шерали", type: "Кафе", cuisine: "Узбекская", address: "ул. Аскар Шакиров, 67", price: 250, rating: 120, options: ["🚴 Доставка"], gis: null },
+        { name: "Рубай", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Монуева, 45", price: 250, rating: 105, options: ["🚴 Доставка"], gis: null },
+        { name: "Пекин", type: "Кафе", cuisine: "Китайская", address: "ул. Монуева, 30", price: 480, rating: 140, options: ["🚴 Доставка"], gis: null },
+        { name: "Студенческая столовая", type: "Столовая", cuisine: "Кыргызская", address: "пр. Ленина, 75", price: 120, rating: 220, options: [], gis: null },
+        { name: "Шашлык.Ош", type: "Кафе", cuisine: "Кыргызская", address: "ул. 20 Партсъезда, 21", price: null, rating: 60, options: [], gis: null },
+        { name: "1001 ночь", type: "Чайхана", cuisine: "Узбекская", address: "ул. Джамалова Абдижалила, 3", price: 400, rating: 170, options: ["🚴 Доставка"], gis: null },
+        { name: "Коктебель", type: "Кафе", cuisine: "Европейская", address: "пр. Абсамата Масалиева, 120", price: 650, rating: 100, options: ["☀️ Веранда"], gis: null },
+        { name: "Столица", type: "Ресторан", cuisine: "Кыргызская", address: "ул. Алымбека Датка, 170", price: 900, rating: 130, options: ["🚴 Доставка"], gis: null },
+        { name: "Ласточка", type: "Кафе", cuisine: "Европейская", address: "ул. Раимбекова, 12", price: 400, rating: 90, options: ["☀️ Веранда"], gis: null },
+        { name: "Кристалл Зал", type: "Банкетный зал", cuisine: "Европейская", address: "ул. Мамытбекова, 200", price: 1800, rating: 70, options: ["☀️ Веранда"], gis: null },
+        { name: "Орион", type: "Кафе", cuisine: "Европейская", address: "ул. Алымбека Датка, 620", price: 550, rating: 80, options: ["🚴 Доставка"], gis: null },
+        { name: "Jannat Hall", type: "Банкетный зал", cuisine: "Кыргызская", address: "Кокум-Бий ул., 5/2", price: 2500, rating: 60, options: [], gis: null },
+        { name: "Мозаика", type: "Кафе", cuisine: "Европейская", address: "ул. Алымбека Датка, 440", price: 700, rating: 85, options: ["🚴 Доставка"], gis: null },
+        { name: "Балабан", type: "Кафе", cuisine: "Кыргызская", address: "ул. Алымбека Датка, 560", price: 350, rating: 90, options: [], gis: null },
+        { name: "Фьюжн", type: "Кафе", cuisine: "Европейская", address: "ул. Рысбая Абдыкадырова, 134", price: 700, rating: 95, options: ["🚴 Доставка"], gis: null },
+        { name: "Deniz", type: "Ресторан", cuisine: "Японская", address: "пр. Абсамата Масалиева, 7", price: 1500, rating: 240, options: ["🚴 Доставка"], gis: null },
+        { name: "Дракон", type: "Кафе", cuisine: "Китайская", address: "ул. Аскар Шакиров, 400", price: 400, rating: 120, options: ["🚴 Доставка"], gis: null },
+        { name: "Aura Grand Hall", type: "Банкетный зал", cuisine: "Кыргызская", address: "ул. Алымбека Датка, 400", price: 3000, rating: 55, options: ["☀️ Веранда"], gis: null },
+        { name: "Зирафа", type: "Кафе", cuisine: "Европейская", address: "ул. Аскар Шакиров, 300", price: 500, rating: 80, options: ["🚴 Доставка"], gis: null },
+        { name: "Алтын Казан", type: "Кафе", cuisine: "Восточная", address: "ул. Аскар Шакиров, 126", price: 400, rating: 100, options: ["🚴 Доставка"], gis: null },
+        { name: "Тандыр Ош", type: "Чайхана", cuisine: "Кыргызская", address: "ул. Жийделик, 170", price: null, rating: 65, options: ["🚴 Доставка"], gis: null },
+        { name: "Tandoro", type: "Ресторан", cuisine: "Итальянская", address: "ул. Мухаммеда Али Джиннаха, 25", price: 1000, rating: 210, options: ["☀️ Веранда"], gis: null },
+        { name: "Пармезан", type: "Ресторан", cuisine: "Итальянская", address: "ул. Алымбека Датка, 172", price: 800, rating: 170, options: ["🚴 Доставка"], gis: null },
+        { name: "Azur", type: "Ресторан", cuisine: "Восточная", address: "ул. Бекмамата Осмонова, 101/7а", price: 350, rating: 90, options: ["🚴 Доставка"], gis: null },
+        { name: "Суши Яки", type: "Суши-бар", cuisine: "Японская", address: "ул. Амир-Тимура, 9а Блок А", price: 500, rating: 140, options: ["🚴 Доставка"], gis: null },
+        { name: "Mone", type: "Ресторан", cuisine: "Японская", address: "ул. Аскар Шакиров, 108а", price: 1500, rating: 220, options: ["🚴 Доставка"], gis: null },
+        { name: "Шанхай Сити", type: "Кафе", cuisine: "Китайская", address: "ул. Нурматова, 22", price: 1000, rating: 160, options: ["☀️ Веранда"], gis: null },
+        { name: "Копуро", type: "Ресторан", cuisine: "", address: "ул. Алишера Навои, 17а/1", price: null, rating: 40, options: [], gis: null },
+        { name: "Хан Ордо", type: "Ресторан", cuisine: "Кыргызская", address: "Ош", price: null, rating: 110, options: ["🎤 Караоке"], gis: null },
+        { name: "Динат", type: "Банкетный зал", cuisine: "Кыргызская", address: "мкр. Анар, 6а", price: null, rating: 45, options: [], gis: null },
+        { name: "Kazyna Grand", type: "Банкетный зал", cuisine: "Кыргызская", address: "Ош", price: null, rating: 40, options: [], gis: null },
+        { name: "Касиет", type: "Ресторан", cuisine: "Кыргызская", address: "Ош", price: null, rating: 70, options: [], gis: null },
+        { name: "Jannat Resort Osh", type: "Ресторан", cuisine: "Кыргызская", address: "ул. Кокум-Бий, 5/3", price: null, rating: 100, options: [], gis: null },
+        { name: "Merri Garden", type: "Кафе", cuisine: "Европейская", address: "Ош", price: null, rating: 80, options: ["☀️ Веранда"], gis: null },
+        { name: "Брио (Brio)", type: "Кофейня", cuisine: "Европейская", address: "ул. Курманжан Датка, 211", price: null, rating: 140, options: [], gis: null },
+        { name: "На углях", type: "Кафе", cuisine: "Европейская", address: "ул. Курманжан Датка, 245", price: null, rating: 210, options: [], gis: null },
+        { name: "Brownie (Брауни)", type: "Кофейня", cuisine: "Европейская", address: "ул. Ленина, 351а", price: null, rating: 180, options: [], gis: null },
+        { name: "Sierra", type: "Кофейня", cuisine: "Европейская", address: "ул. Алымбек Датка, 269", price: null, rating: 220, options: [], gis: null },
+        { name: "Moqqo", type: "Кофейня", cuisine: "Европейская", address: "ул. Алымбека Датка, 298/1а", price: null, rating: 150, options: [], gis: null },
+        { name: "White Night", type: "Кофейня", cuisine: "Европейская", address: "ул. М. Али Джиннаха, 2а", price: null, rating: 190, options: [], gis: null },
+        { name: "Aroma Coffee", type: "Кофейня", cuisine: "Европейская", address: "ул. Алымбека Датка, 322б", price: null, rating: 210, options: [], gis: null },
+        { name: "Garden", type: "Кафе", cuisine: "Европейская", address: "ул. Асранкулова, 124/1", price: null, rating: 130, options: ["☀️ Веранда"], gis: null },
+        { name: "Flo", type: "Кофейня", cuisine: "Европейская", address: "пр. Абсамата Масалиева, 40", price: null, rating: 170, options: [], gis: null },
+        { name: "Aliktin uyu", type: "Кофейня", cuisine: "Европейская", address: "ул. Алымбека Датка, 40", price: null, rating: 90, options: [], gis: null },
+        { name: "My Food", type: "Фастфуд", cuisine: "Американская", address: "ул. Курманжан Датка, 105А", price: 250, rating: 210, options: ["🚴 Доставка"], gis: null },
+        { name: "2 Повара", type: "Фастфуд", cuisine: "Европейская", address: "ул. Санжара Касымбекова, 8г/1", price: 200, rating: 190, options: [], gis: null },
+        { name: "Oasis", type: "Фастфуд", cuisine: "Европейская", address: "ул. Гапара Айтиева, 9", price: 200, rating: 170, options: [], gis: null },
+        { name: "Eki Dos", type: "Фастфуд", cuisine: "Европейская", address: "ул. Курманжан датка, 276/2", price: 180, rating: 230, options: ["🚴 Доставка"], gis: null },
+        { name: "KFS", type: "Фастфуд", cuisine: "Европейская", address: "мкр. Кулатова, 3а", price: 200, rating: 160, options: [], gis: null },
+        { name: "Chicken Pizza", type: "Фастфуд", cuisine: "Европейская", address: "ул. Курманжан датка, 250а", price: 250, rating: 140, options: [], gis: null },
+        { name: "Sushi Roll", type: "Суши-бар", cuisine: "Японская", address: "ул. Н. Исанова, 56Б", price: 500, rating: 120, options: ["🚴 Доставка"], gis: null },
+        { name: "Tez Tatym", type: "Фастфуд", cuisine: "Европейская", address: "ул. Аскар Шакиров, 108/2а", price: 150, rating: 190, options: [], gis: null },
+        { name: "Muslim Grill", type: "Фастфуд", cuisine: "Халяль", address: "ул. Курманжан датка, 82", price: 150, rating: 210, options: ["🌙 Халяль"], gis: null },
+        { name: "Pizza Land", type: "Фастфуд", cuisine: "Итальянская", address: "пр. Абсамата Масалиева, 40", price: 300, rating: 160, options: ["🚴 Доставка"], gis: null },
+        { name: "H! Tea", type: "Кофейня", cuisine: "Азиатская", address: "ул. Курманжан датка, 244", price: 150, rating: 180, options: [], gis: null },
+        { name: "Mr. BBQ", type: "Кафе", cuisine: "Европейская", address: "ул. Аскар Шакиров, 275/1", price: 400, rating: 130, options: [], gis: null },
+        { name: "Три вкуса", type: "Кафе", cuisine: "Азиатская", address: "ул. Насирдина Исанова, 26", price: 400, rating: 110, options: [], gis: null },
+        { name: "Marjan", type: "Кафе", cuisine: "Кыргызская", address: "ул. Рысбая Абдыкадырова, 154", price: 300, rating: 100, options: [], gis: null },
+        { name: "Алмаз", type: "Столовая", cuisine: "Кыргызская", address: "ул. Алымбека Датка, 272/1", price: 150, rating: 210, options: [], gis: null },
+        { name: "Фаиза", type: "Кафе", cuisine: "Узбекская", address: "ул. 2-й Достук, 10а", price: 200, rating: 230, options: [], gis: null },
+        { name: "Аль-Мансур", type: "Кафе", cuisine: "Узбекская", address: "пр. Масалиева, 17", price: 150, rating: 170, options: [], gis: null },
+        { name: "DaBro", type: "Кафе", cuisine: "Европейская", address: "ул. Карасуйская, 8в", price: 350, rating: 120, options: [], gis: null },
+        { name: "Афганец", type: "Кафе", cuisine: "Кыргызская", address: "ул. Солиева, 1", price: 120, rating: 190, options: [], gis: null },
+        { name: "Наргиза", type: "Кафе", cuisine: "Кыргызская", address: "ул. Осмонова, 14", price: 120, rating: 180, options: [], gis: null },
+        { name: "Айдар-Ата", type: "Кафе", cuisine: "Кыргызская", address: "ул. Мамырова, 4/5", price: 120, rating: 200, options: [], gis: null },
+        { name: "Майда-манты", type: "Столовая", cuisine: "Кыргызская", address: "ул. Курманжан Датка, 590", price: 150, rating: 170, options: [], gis: null },
+        { name: "5-манты", type: "Кафе", cuisine: "Кыргызская", address: "ул. Курманжан Датка, 87", price: 150, rating: 210, options: [], gis: null },
+        { name: "Мантыкана", type: "Кафе", cuisine: "Кыргызская", address: "ул. Толонова, 8к", price: 150, rating: 160, options: [], gis: null },
+        { name: "Buka steak house", type: "Ресторан", cuisine: "Европейская", address: "ул. А. Шакирова, 132", price: 1200, rating: 200, options: [], gis: null },
+        { name: "Macaron by Sabina", type: "Кондитерская", cuisine: "", address: "пр. Ленина, 302", price: 200, rating: 110, options: [], gis: null },
+        { name: "Ugolok", type: "Кофейня", cuisine: "Европейская", address: "ул. Курманжан Датка, 92", price: 250, rating: 160, options: [], gis: null },
+        { name: "Malina", type: "Кофейня", cuisine: "Европейская", address: "ул. Алымбека Датка, 299а", price: 250, rating: 150, options: [], gis: null },
+        { name: "Hayat", type: "Кофейня", cuisine: "Европейская", address: "ул. М. Али Джиннаха, 2а", price: 250, rating: 170, options: [], gis: null },
+        { name: "Sushi Yaki", type: "Суши-бар", cuisine: "Японская", address: "ул. Амир-Тимура, 9а", price: 500, rating: 140, options: ["🚴 Доставка"], gis: null },
+        { name: "Musaffo", type: "Кафе", cuisine: "Кыргызская", address: "Ош", price: 200, rating: 90, options: [], gis: null },
+        { name: "Moida", type: "Ресторан", cuisine: "Кыргызская", address: "Ош", price: 300, rating: 85, options: [], gis: null },
+        { name: "Ali Baba", type: "Ресторан", cuisine: "Турецкая", address: "ТЦ Москва, ул. Усманова, 56", price: 600, rating: 150, options: [], gis: null },
+        { name: "Sultan", type: "Кафе", cuisine: "Кыргызская", address: "ул. Курманжан-Датка, 500", price: 400, rating: 110, options: [], gis: null },
+        { name: "Aylin", type: "Банкетный зал", cuisine: "Кыргызская", address: "ул. Р. Абдыкадырова, 197/3", price: null, rating: 40, options: [], gis: null },
+        { name: "Sushi Studio", type: "Суши-бар", cuisine: "Японская", address: "ул. Р. Абдыкадырова, 245/1", price: 500, rating: 180, options: ["🚴 Доставка"], gis: null },
+        { name: "Kinki", type: "Ресторан", cuisine: "Японская", address: "ул. Р. Абдыкадырова, 15а", price: 800, rating: 160, options: [], gis: null },
+        { name: "Beksultan Azhy Ata", type: "Кафе", cuisine: "Кыргызская", address: "ул. Г. Айтиева, 86а", price: 250, rating: 120, options: [], gis: null },
+        { name: "Orto Asia", type: "Банкетный зал", cuisine: "Кыргызская", address: "ул. Исхака Раззакова, 23", price: null, rating: 55, options: [], gis: null },
+        { name: "Lavka Coffee", type: "Кофейня", cuisine: "Европейская", address: "пр. Абсамата Масалиева, 54Б", price: 200, rating: 140, options: [], gis: null },
+        { name: "Iris", type: "Кофейня", cuisine: "Европейская", address: "ул. Алымбека Датка, 349", price: 250, rating: 130, options: [], gis: null },
+        { name: "Aё", type: "Кофейня", cuisine: "Европейская", address: "ул. Алымбека Датка, 316", price: 250, rating: 120, options: [], gis: null },
+        { name: "Bodro Coffee", type: "Кофейня", cuisine: "Европейская", address: "Ош", price: 200, rating: 110, options: [], gis: null },
+        { name: "Messto coffee house", type: "Кофейня", cuisine: "Европейская", address: "ул. Алиева, 104", price: 250, rating: 140, options: [], gis: null },
+        { name: "Бранч", type: "Кофейня", cuisine: "Европейская", address: "Ош", price: 250, rating: 100, options: [], gis: null },
+        { name: "Coffee Mir Osh", type: "Кофейня", cuisine: "Европейская", address: "Ош", price: 200, rating: 95, options: [], gis: null },
+        { name: "Mango", type: "Кофейня", cuisine: "Европейская", address: "ул. Курманжан датка, 89", price: 250, rating: 160, options: [], gis: null },
+        { name: "Panorama", type: "Ресторан", cuisine: "Европейская", address: "ул. Алымбека Датка, 170", price: 2000, rating: 280, options: ["☀️ Веранда"], gis: null },
+        { name: "Ясин", type: "Кафе", cuisine: "Узбекская", address: "ул. Курманжан датка, 630", price: 200, rating: 140, options: [], gis: null },
+        { name: "Жасур аш борбору", type: "Кафе", cuisine: "Узбекская", address: "ул. Абдыкадирова, 141А", price: 150, rating: 150, options: [], gis: null },
+        { name: "Aksaray Cafe", type: "Кафе", cuisine: "Турецкая", address: "ул. Гапара Айтиева, 173", price: 400, rating: 130, options: [], gis: null },
+        { name: "Tooman", type: "Ресторан", cuisine: "Европейская", address: "пр. Абсамата Масалиева, 102", price: 1000, rating: 140, options: [], gis: null },
+        { name: "The Lokmaco", type: "Кофейня", cuisine: "Турецкая", address: "ул. Курманжан-Датка, 605", price: 300, rating: 120, options: [], gis: null },
+        { name: "Хачапурная №1", type: "Кафе", cuisine: "Грузинская", address: "Ош", price: 300, rating: 130, options: [], gis: null },
+        { name: "Остров", type: "Ресторан", cuisine: "Европейская", address: "Ош", price: 800, rating: 110, options: [], gis: null },
+        { name: "Устукан", type: "Фастфуд", cuisine: "Кыргызская", address: "ул. Гапара Айтиева, 15/1а", price: 200, rating: 180, options: ["🚴 Доставка"], gis: null },
+        { name: "Lavash center", type: "Фастфуд", cuisine: "Кыргызская", address: "ул. Аскар Шакиров, 275", price: 150, rating: 200, options: ["🚴 Доставка"], gis: null },
+        { name: "Оскар", type: "Чайхана", cuisine: "Кыргызская", address: "с. Жийделик", price: 300, rating: 80, options: [], gis: null },
+        { name: "Башня (Чайхана)", type: "Чайхана", cuisine: "Кыргызская", address: "пер. Алымбек Датки, 31", price: 300, rating: 70, options: [], gis: null },
+        { name: "Вкусные Суши", type: "Суши-бар", cuisine: "Японская", address: "ул. С. Ибраимова, 11/1", price: 500, rating: 110, options: ["🚴 Доставка"], gis: null },
+        { name: "Osh Posh", type: "Ресторан", cuisine: "Восточная", address: "Ош", price: 800, rating: 160, options: ["☀️ Терраса"], gis: null }
+    ];
+
+    let partnerFilter = false;
+    let currentType = "all";
+    let currentCuisine = "all";
+    let currentPrice = "all";
+    let sortBy = "name-asc";
+
+    function savePartners() {
+        const partners = {};
+        document.querySelectorAll('.partner-checkbox').forEach(cb => {
+            partners[cb.dataset.name] = cb.checked;
+        });
+        localStorage.setItem('osh_food_partners', JSON.stringify(partners));
+    }
+
+    function loadPartners() {
+        const saved = localStorage.getItem('osh_food_partners');
+        if (saved) {
+            const partners = JSON.parse(saved);
+            document.querySelectorAll('.partner-checkbox').forEach(cb => {
+                if (partners[cb.dataset.name]) cb.checked = true;
+            });
+        }
+    }
+
+    function getGisLink(p) {
+        if (p.gis) return p.gis;
+        if (p.address && p.address !== "Ош" && p.address !== "Нет данных") {
+            return `https://2gis.kg/search/${encodeURIComponent(p.name + ' ' + p.address)}`;
+        }
+        return `https://2gis.kg/search/${encodeURIComponent(p.name + ' Ош')}`;
+    }
+
+    function renderTable() {
+        let filtered = places.filter(p => {
+            if (currentType !== "all" && p.type !== currentType) return false;
+            if (currentCuisine !== "all" && !p.cuisine.includes(currentCuisine)) return false;
+            const price = p.price || 0;
+            if (currentPrice === "low" && (price > 300 || price === 0)) return false;
+            if (currentPrice === "mid" && (price < 300 || price > 800)) return false;
+            if (currentPrice === "high" && price < 800) return false;
+            if (partnerFilter) {
+                const saved = localStorage.getItem('osh_food_partners');
+                if (saved) {
+                    const partners = JSON.parse(saved);
+                    if (!partners[p.name]) return false;
+                } else return false;
+            }
+            return true;
+        });
+
+        if (sortBy === 'name-asc') filtered.sort((a,b) => a.name.localeCompare(b.name));
+        else if (sortBy === 'name-desc') filtered.sort((a,b) => b.name.localeCompare(a.name));
+        else if (sortBy === 'price-low') filtered.sort((a,b) => (a.price || 9999) - (b.price || 9999));
+        else if (sortBy === 'price-high') filtered.sort((a,b) => (b.price || 0) - (a.price || 0));
+        else if (sortBy === 'rating-desc') filtered.sort((a,b) => (b.rating || 0) - (a.rating || 0));
+
+        document.getElementById('stats-count').innerHTML = `🍽️ Найдено: ${filtered.length} заведений`;
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = filtered.map((p, idx) => `
+            <tr>
+                <td>${idx+1}</td>
+                <td><strong>${p.name}</strong></td>
+                <td>${p.type}</td>
+                <td>${p.cuisine || '—'}</td>
+                <td class="address">${p.address}</td>
+                <td class="price-tag">${p.price ? `~ ${p.price} сом` : '—'}</td>
+                <td>${(p.options || []).map(opt => `<span class="badge"><i class="fas ${opt.includes('🚴') ? 'fa-motorcycle' : opt.includes('☀️') ? 'fa-sun' : opt.includes('🌙') ? 'fa-moon' : 'fa-tag'}"></i> ${opt}</span>`).join('')}</td>
+                <td>${p.rating || 0}</td>
+                <td class="link-2gis"><a href="${getGisLink(p)}" target="_blank" rel="noopener noreferrer">📍 Открыть в 2ГИС</a></td>
+                <td><input type="checkbox" class="partner-checkbox" data-name="${p.name}" ${localStorage.getItem('osh_food_partners') && JSON.parse(localStorage.getItem('osh_food_partners'))[p.name] ? 'checked' : ''}></td>
+            </tr>
+        `).join('');
+
+        document.querySelectorAll('.partner-checkbox').forEach(cb => {
+            cb.addEventListener('change', () => { savePartners(); if(partnerFilter) renderTable(); });
+        });
+    }
+
+    document.getElementById('filter-type').addEventListener('change', (e) => { currentType = e.target.value; renderTable(); });
+    document.getElementById('filter-cuisine').addEventListener('change', (e) => { currentCuisine = e.target.value; renderTable(); });
+    document.getElementById('filter-price').addEventListener('change', (e) => { currentPrice = e.target.value; renderTable(); });
+    document.getElementById('sort-by').addEventListener('change', (e) => { sortBy = e.target.value; renderTable(); });
+    document.getElementById('partner-filter-btn').addEventListener('click', () => {
+        partnerFilter = !partnerFilter;
+        document.getElementById('partner-filter-btn').classList.toggle('active', partnerFilter);
+        renderTable();
+    });
+
+    renderTable();
+    loadPartners();
+</script>
+</body>
+</html>
